@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+body {
+    --bg-dark-bluish: #002233;
+    --bg-darker-bluish: #001829;
+    --bg-darkest-bluish: #001220;
+    
+    margin: 0;
+    font-family: 'Prompt', sans-serif;
+    color: white;
+    background: var(--bg-darkest-bluish);
+}
