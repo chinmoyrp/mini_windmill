@@ -12,3 +12,7 @@ body {
     color: white;
     background: var(--bg-darkest-bluish);
 }
+
+button {
+    background: theme('colors.brightblue');
+}

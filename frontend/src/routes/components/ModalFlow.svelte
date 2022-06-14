@@ -26,26 +26,17 @@ func _g_main(x int, y int) int {
 <div id="modal" style="--display: {isOpenModal ? 'block' : 'none'};" class="rounded-2xl p-1">
     <div class="codeinput divide-y-2 rounded-xl p-2">
         <div class="flex justify-between">
-            {#if saveDisabled}
-            <label>Script:
-            <input type="text" placeholder="Name..." name="script">
-            </label>
-            {:else}
-            <div class="w-full">
-                <p>Review UI</p>
-            </div>
-            {/if}
+            <label for="cars">Choose a car:</label>
+
+            <select name="cars" id="cars">
+              <option value="volvo">Volvo</option>
+              <option value="saab">Saab</option>
+              <option value="mercedes">Mercedes</option>
+              <option value="audi">Audi</option>
+            </select>
 
             <button class="codenext px-2 mb-1 rounded-xl text-xs" on:click={reviewSubmission}>{btnText}</button>
         </div>
-        {#if saveDisabled}
-        <textarea rows="10" cols="50" form="codeform" placeholder="click...">{boilerplate}</textarea>
-        {:else}
-        <textarea rows="10" cols="50">
-        x (int)
-        y (int)
-        </textarea>    
-        {/if}
         <div class="w-full">
             <button class="codenext px-2 mt-2 rounded-xl text-xs" disabled={saveDisabled} on:click={closeModal}>Save</button>
         </div>
@@ -64,7 +55,7 @@ func _g_main(x int, y int) int {
         filter: drop-shadow(0 0 20px theme('colors.brightblue'));
     }
 
-    .codeinput, textarea, input {
+    .codeinput, select {
         background: theme('colors.darkerblue');
     }
 
