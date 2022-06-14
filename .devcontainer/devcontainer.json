@@ -23,5 +23,10 @@
 		"node": "lts",
 		"golang": "latest",
 		"rust": "latest"
-	}
+	},
+
+	"runArgs": [
+		"--network=mini_network",
+		"--name=mini_windmill_dev"
+	]
 }
