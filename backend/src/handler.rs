@@ -87,61 +87,87 @@ pub async fn add_step(Json(mut step): Json<Step>) -> impl IntoResponse {
     json_result!(step.hash)
 }
 
-pub async fn add_to_flow(Json(hash): Json<String>) -> impl IntoResponse {
-    let steps = db::get_collection::<Step>("steps").await;
-    let step = steps.find_one(doc!{ "hash": &hash }, None).await.unwrap();
-
-    if step.is_none() {
-        return json_result!("No step with this hash exist");
+pub async fn remove_step(Path(hash): Path<String>) -> impl IntoResponse {
+    let coll = db::get_collection::<Step>("steps").await;
+    let existing = coll.find_one_and_delete(doc!{ "hash": &hash }, None).await.unwrap();
+    match existing {
+        Some(step) => {
+            db::log(format!("Removed a step: {} ({})", step.name, step.hash).as_str()).await;
+            json_result!(step.hash)
+        }
+        None => json_result!("No step with this hash exist")
     }
+}
+
+pub async fn update_step(Json(mut step): Json<Step>) -> impl IntoResponse {
+    let old_step = match job::get_step(&step.hash).await {
+        Some(step) => step,
+        None => return json_result!("No step with this hash exist")
+    };
+
+    step.hash = compute_hash!(step);
+    let coll = db::get_collection::<Step>("steps").await;
+    let query = doc!{ "hash": &old_step.hash };
+    let update = doc!{ "$set": {"hash": &step.hash, "name": &step.name, "code": &step.code } };
+    let res = coll.find_one_and_update(query, update, None).await;
+    match res {
+        Ok(_) => {
+            db::log(format!("Updated a step: {} ({})", step.name, step.hash).as_str()).await;
+            json_result!(step.hash)
+        }
+        Err(e) => json_result!(e.to_string())
+    }
+}
+
+pub async fn add_to_flow(Path(hash): Path<String>) -> impl IntoResponse {
+    let step = match job::get_step(&hash).await {
+        Some(step) => step,
+        None => return json_result!("No step with this hash exist")
+    };
 
     let coll = db::get_collection::<Flow>("flow").await;
-    let flow = coll.find_one(None, None).await.unwrap();
-    let step = step.unwrap();
-    if flow.is_none() {
-        let flow = Flow{ steps: vec![step.hash.clone()] };
-        if let Err(_e) = coll.insert_one(flow, None).await {
-            return json_result!("Error inserting flow");
+    match job::get_flow().await {
+        None => {
+            let flow = Flow{ steps: vec![step.hash.clone()] };
+            if let Err(e) = coll.insert_one(flow, None).await {
+                return json_result!(format!("{:?}", e));
+            }
         }
-    } else {
-        let mut flow = flow.unwrap();
-        let query = doc!{ "steps": &flow.steps };
-        flow.steps.push(hash.to_string());
-        let update = doc!{"$set": { "steps": &flow.steps }};
-        if let Err(_e) = coll.update_one(query, update, None).await {
-            return json_result!("Error adding the step to flow");
+        Some(mut flow) => {
+            let query = doc!{ "steps": &flow.steps };
+            flow.steps.push(hash.to_string());
+            let update = doc!{"$set": { "steps": &flow.steps }};
+            if let Err(e) = coll.update_one(query, update, None).await {
+                return json_result!(format!("{:?}", e));
+            }
         }
-
     }
 
     db::log(&format!("Added to flow: {} ({})", step.name, step.hash)).await;
 
-    json_result!(step)
+    json_result!(step.hash)
 }
 
-pub async fn remove_from_flow(Json(index): Json<String>) -> impl IntoResponse {
-    let coll = db::get_collection::<Flow>("flow").await;
-    let flow = coll.find_one(None, None).await.unwrap();
+pub async fn remove_from_flow(Path(index): Path<String>) -> impl IntoResponse {
+    match job::get_flow().await {
+        Some(mut flow) => {
+            let index = match index.parse::<usize>() {
+                Ok(i) if i < flow.steps.len() => i,
+                _ => return json_result!("Invalid index")
+            };
 
-    if flow.is_none() {
-        return json_result!("No flow exist");
+            let coll = db::get_collection::<Flow>("flow").await;
+            let query = doc!{ "steps": &flow.steps };
+            flow.steps.remove(index);
+            let update = doc!{"$set": { "steps": &flow.steps }};
+            if let Err(e) = coll.update_one(query, update, None).await {
+                return json_result!(format!("{:?}", e));
+            }
+            json_result!(index)
+        }
+
+        None => json_result!("No flow exist")
     }
-
-    let mut flow = flow.unwrap();
-    let index = match index.parse::<usize>() {
-        Ok(i) if i < flow.steps.len() => i,
-        _ => return json_result!("Invalid index")
-    };
-
-    let query = doc!{ "steps": &flow.steps };
-    flow.steps.remove(index);
-    let update = doc!{"$set": { "steps": &flow.steps }};
-    if let Err(e) = coll.update_one(query, update, None).await {
-        eprintln!("Error: {:?}", e);
-        return json_result!("Error updating flow");
-    }
-
-    json_result!("success")
 }
 
 pub async fn add_job(Json(mut job): Json<Job>) -> impl IntoResponse {

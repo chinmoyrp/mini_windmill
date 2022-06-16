@@ -31,7 +31,7 @@ pub async fn get_step(hash: &str) -> Option<Step> {
     coll.find_one(doc!{ "hash": hash}, None).await.unwrap()
 }
 
-async fn get_flow() -> Option<Flow> {
+pub async fn get_flow() -> Option<Flow> {
     let coll = db::get_collection::<Flow>("flow").await;
     coll.find_one(None, None).await.unwrap()
 }
@@ -71,11 +71,19 @@ pub async fn run(job: Job) {
 
         JobKind::Flow(_) => { 
             let flow = get_flow().await;
-            if let Some(Flow{ steps: _ }) = flow {
-                // for hash in steps {
-                //     let step = get_step(&hash).await;
-                //     step::execute(step.unwrap()).await;
-                // }
+            if let Some(Flow{ steps }) = flow {
+                db::log("Executing flow").await;
+                for hash in steps {
+                    let step = get_step(&hash).await.unwrap();
+                    // let coll = db::get_collection::<Output>(&hash).await;
+                    // let res = coll.find_one(None, None).await.unwrap();
+                    // if let Some(mut out) = res {
+                    //     let query = doc!{ "output": &out.output };
+                    //     out.output.push(format!("Executing step: {}", step.hash));
+                    //     coll.find_one_and_replace(query, out, None).await.unwrap();
+                    // }
+                    step::execute(&job.id, step).await;
+                }
             }
         }
     }
