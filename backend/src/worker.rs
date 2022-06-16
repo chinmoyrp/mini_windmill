@@ -2,10 +2,10 @@ use anyhow::Result;
 use bson::doc;
 use serde::{Serialize, Deserialize};
 use tokio::time::{sleep, Duration, Instant};
-use crate::{db, job};
-use crate::flow::Flow;
-use crate::job::{JobKind, Job, JobStatus};
-use crate::step::{self, Step};
+use mongodb::change_stream::event::OperationType;
+
+use crate::db;
+use crate::job::{self, Job};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Worker {
@@ -41,6 +41,10 @@ async fn watch_for_jobs(id: u32) {
         }
 
         if let Some(event) = watch.next_if_any().await.unwrap() {
+            if event.operation_type != OperationType::Insert {
+                continue;
+            }
+
             let doc = event.full_document;
             if doc.is_none() {
                 continue;
@@ -66,8 +70,7 @@ async fn watch_for_jobs(id: u32) {
             
             if job.worker_id == id {
                 update_worker_status(id, String::from("Busy")).await;
-                sleep(Duration::from_secs(20)).await;
-                //job::run(job).await;
+                job::run(job).await;
                 update_worker_status(id, String::from("Idle")).await;
             }
         }

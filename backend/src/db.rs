@@ -1,28 +1,13 @@
-use futures::TryStreamExt;
 use mongodb::{
     Client, Collection, Database,
-    bson::{doc, Document}
+    bson::doc
 };
 use serde::{Serialize, Deserialize};
 use chrono::Utc;
-use axum::Json;
 use anyhow::Result;
 
-const MONGODB_URI: &str = "mongodb://172.19.0.2:27017";
+const MONGODB_URI: &str = "mongodb://172.19.0.3:27017";
 const DB_NAME: &str = "mini_windmill";
-
-#[derive(Debug, Serialize)]
-pub struct JsonResult<T>
-    where T: Serialize 
-{
-    result: T,
-}
-
-impl<T: Serialize> JsonResult<T> {
-    pub fn from(data: T) -> Json<JsonResult<T>> {
-        Json(JsonResult { result: data } )
-    }
-}
 
 pub fn get_current_datetime() -> String {
     Utc::now().format("%Y-%m-%d %H:%M:%S").to_string()

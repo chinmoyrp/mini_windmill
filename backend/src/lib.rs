@@ -26,6 +26,7 @@ pub async fn run_server(addr: SocketAddr) -> Result<()> {
                             .route("/flow", get(handler::get_current_flow).post(handler::add_to_flow))
                             .route("/flow/remove", get(fallback).post(handler::remove_from_flow))
                             .route("/jobs", get(handler::get_jobs).post(handler::add_job))
+                            .route("/jobs/:hash", get(handler::get_job).post(fallback))
                             .route("/workers", get(handler::get_workers))
                             .route("/logs", get(handler::get_logs));
 

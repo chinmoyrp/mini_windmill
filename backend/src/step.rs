@@ -1,9 +1,8 @@
-use tokio::join;
 use bson::doc;
 use std::fs::File;
-use std::process::{Command, Stdio};
+use std::process::{Command};
 use serde::{Serialize, Deserialize};
-use std::io::{Write, BufRead, BufReader};
+use std::io::Write;
 
 use crate::db;
 
@@ -16,60 +15,38 @@ pub struct Step {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Output {
-    job_id: String,
-    step: Step,
-    output: Vec<String>,
+    pub output: Vec<String>,
 }
 
-// pub async fn publish_step_result(job_id: String, step: Step, output: String) {
-//     let coll = db::get_collection::<Output>(&job_id).await;
-//     let res = coll.find_one(None, None).await.unwrap();
-//     if res.is_none() {
-//         let out = Output{ job_id, step, output:vec![output] };
-//         coll.insert_one(out, None).await.unwrap();
-//     } else {
-//         let mut res = res.unwrap();
-//         res.output.push(output);
-//         coll.find_one_and_replace(doc!{ "job_id" : &job_id }, res, None).await.unwrap();
-//     }
-// }
-
-// pub async fn publish_flow_result(job_id: String, code: String, output: String) {
-//     let coll = db::get_collection::<Output>(&job_id).await;
-//     let res = coll.find_one(doc!{ "job_id" : &job_id }, None).await.unwrap();
-//     if res.is_none() {
-//         let out = Output{ job_id, code, output:vec![output] };
-//         coll.insert_one(out, None).await.unwrap();
-//     } else {
-//         let mut res = res.unwrap();
-//         res.output.push(output);
-//         coll.find_one_and_replace(doc!{ "job_id" : &job_id }, res, None).await.unwrap();
-//     }
-// }
-
-pub async fn execute(step: Step) {
+pub async fn execute(job_id: &str, step: Step) {
     let filepath = format!("/tmp/{}.go", step.hash);
 
     let mut file = File::create(&filepath).unwrap();
     file.write_all(step.code.as_bytes()).unwrap();
 
-    let mut child = Command::new("/usr/local/go/bin/go")
+    let output = Command::new("/usr/local/go/bin/go")
                     .args(["run", &filepath])
-                    .stdout(Stdio::piped())
-                    .spawn()
+                    .output()
                     .expect("go failed to execute!");
-
     
-    let stderr = child.stderr.as_mut().unwrap();
+    // if child.stderr.is_some() {
+    // let stderr = child.stderr.as_mut().unwrap();
+    // let reader_err = BufReader::new(stderr);
+    // for err in reader_err.lines() {
+    //     println!("{:?}....o]eut", err);
+    //     let coll = db::get_collection::<Output>(job_id).await;
+    //     let mut res = coll.find_one(None, None).await.unwrap();
+    //     let out = res.as_mut().unwrap();
+    //     out.output.push(err.unwrap());
+    //     coll.find_one_and_replace(doc! { "output" : &out.output }, out, None).await.unwrap();
+    // }}
 
-    
-    let reader_err = BufReader::new(stderr);
-
-    join!(
-        async {
-            let stdout = child.stdout.as_mut().unwrap();
-            let reader_out = BufReader::new(stdout);
-
-        }
-    );
+    let coll = db::get_collection::<Output>(job_id).await;
+    let mut res = coll.find_one(None, None).await.unwrap();
+    let res = res.as_mut().unwrap();
+    let filter = doc! { "output" : &res.output };
+    let mut out_text = String::from_utf8_lossy(&output.stdout).to_string();
+    out_text.push_str(&String::from_utf8_lossy(&output.stderr).to_string());
+    res.output.push(out_text);
+    coll.find_one_and_replace(filter, res, None).await.unwrap();
 }
