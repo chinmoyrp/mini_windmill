@@ -6,11 +6,12 @@ body {
     --bg-dark-bluish: #002233;
     --bg-darker-bluish: #001829;
     --bg-darkest-bluish: #001220;
+    --bg-razorblue: #181C2D;
     
     margin: 0;
     font-family: 'Prompt', sans-serif;
     color: white;
-    background: var(--bg-darkest-bluish);
+    background: var(--bg-razorblue);
 }
 
 button {

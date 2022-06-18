@@ -1,4 +1,4 @@
-use axum::{Json, response::IntoResponse, extract::Path};
+use axum::{Json, response::{IntoResponse, AppendHeaders}, extract::Path};
 use bson::{doc, Document};
 use futures::TryStreamExt;
 use std::collections::HashMap;
@@ -15,7 +15,7 @@ macro_rules! json_result {
         {
             let mut map = HashMap::new();
             map.insert("result", $a);
-            Json(map).into_response()
+            (AppendHeaders([("Access-Control-Allow-Origin", "*")]), Json(map).into_response())
         }
     }
 }
@@ -29,6 +29,7 @@ macro_rules! compute_hash {
 pub async fn get_available_steps() -> impl IntoResponse {
     let cursor = db::get_collection::<Step>("steps").await.find(None, None).await.unwrap();
     let v: Vec<_> = cursor.try_collect().await.unwrap_or_default();
+
     json_result!(v)
 }
 

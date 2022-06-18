@@ -9,6 +9,7 @@ module.exports = {
       'darkestblue': '#001220',
       'darkerblue': '#001829',
       'darkblue': '#002233',
+      'razorblue': '#181C2E',
     },
   },
   plugins: [],

@@ -1,6 +1,21 @@
 <script lang="ts">
     import Step from "./components/Step.svelte";
     import Modal from "./components/Modal.svelte";
+    import { onMount } from "svelte";
+    import { steps } from '../store';
+
+    import Prism from "prettier";
+
+    onMount(async () => {
+        fetch("http://localhost:8080/api/steps")
+        .then(response => response.json())
+        .then(data => {
+            steps.set(data["result"]);
+            //console.log(names);
+            
+        })
+        .catch(error => console.log(error));
+    });
 
     let scripts: string[] = ['hello-world'];
     let isOpenModal: boolean = false;
@@ -16,12 +31,14 @@
 </script>
 
 <div class="ml-4 mr-4 mt-12 mb-12 p-1">
-    <h2 class="uppercase text-lg pb-1 mb-2 border-b-2 border-brightblue">Available scripts</h2>
-    {#each scripts as content}
-        <Step {content}></Step>
-    {/each}
+    <h2 class="uppercase text-lg pb-1 mb-2 border-b-2">Available scripts</h2>
+    <div class="flex gap-8">
+        {#each $steps as {hash, name, code}}
+        <Step {name} {hash} {code}></Step>
+        {/each}
+    </div>
+    
     <Modal {isOpenModal}> </Modal>
-    <button on:click={openEditor}>Clickme!</button>
 </div>
 
 <style>
