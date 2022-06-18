@@ -10,9 +10,9 @@ use axum::{
     routing::get, 
     handler::Handler,
     response::IntoResponse, 
-    http::{StatusCode,Uri}};
+    http::{StatusCode, Uri, Method}};
 use tower::ServiceBuilder;
-use tower_http::trace::TraceLayer;
+use tower_http::cors::{Any, CorsLayer};
 use std::net::SocketAddr;
 use anyhow::Result;
 
@@ -31,11 +31,14 @@ pub async fn run_server(addr: SocketAddr) -> Result<()> {
                             .route("/jobs", get(handler::get_jobs).post(handler::add_job))
                             .route("/jobs/:hash", get(handler::get_job).post(fallback))
                             .route("/workers", get(handler::get_workers).post(fallback))
-                            .route("/logs", get(handler::get_logs).post(fallback));
+                            .route("/logs", get(handler::get_logs).post(fallback))
+                            .route("/spec", get(handler::get_openapi_spec).post(fallback));
+
+    let cors = CorsLayer::very_permissive();
 
     let routes = Router::new()
                     .nest("/api", api_routes)
-                    .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+                    .layer(ServiceBuilder::new().layer(cors))
                     .fallback(fallback.into_service());
 
     axum::Server::bind(&addr).serve(routes.into_make_service()).await?;

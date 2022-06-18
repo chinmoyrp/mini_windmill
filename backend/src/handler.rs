@@ -1,7 +1,7 @@
 use axum::{Json, response::{IntoResponse, AppendHeaders}, extract::Path};
 use bson::{doc, Document};
 use futures::TryStreamExt;
-use std::collections::HashMap;
+use std::{collections::HashMap, fs};
 use chrono::Utc;
 
 use crate::step::{Step, Output};
@@ -15,7 +15,8 @@ macro_rules! json_result {
         {
             let mut map = HashMap::new();
             map.insert("result", $a);
-            (AppendHeaders([("Access-Control-Allow-Origin", "*")]), Json(map).into_response())
+            //(AppendHeaders([("Access-Control-Allow-Origin", "*")]), Json(map).into_response())
+            Json(map).into_response()
         }
     }
 }
@@ -191,5 +192,10 @@ pub async fn add_job(Json(mut job): Json<Job>) -> impl IntoResponse {
     db::log(&format!("Added a job to queue: id({})", job.id)).await;
 
     json_result!(job.id)
+}
+
+pub async fn get_openapi_spec() -> impl IntoResponse {
+    let api = fs::read_to_string("./openapi.yaml").unwrap();
+    (AppendHeaders([("Access-Control-Allow-Origin", "*")]), api)
 }
 

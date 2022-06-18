@@ -74,7 +74,7 @@ pub async fn run(job: Job) {
             if let Some(Flow{ steps }) = flow {
                 db::log("Executing flow").await;
                 for hash in steps {
-                    let step = get_step(&hash).await.unwrap();
+                    let step = get_step(&hash).await;
                     // let coll = db::get_collection::<Output>(&hash).await;
                     // let res = coll.find_one(None, None).await.unwrap();
                     // if let Some(mut out) = res {
@@ -82,7 +82,9 @@ pub async fn run(job: Job) {
                     //     out.output.push(format!("Executing step: {}", step.hash));
                     //     coll.find_one_and_replace(query, out, None).await.unwrap();
                     // }
-                    step::execute(&job.id, step).await;
+                    if let Some(step) = step {
+                        step::execute(&job.id, step).await;
+                    }
                 }
             }
         }

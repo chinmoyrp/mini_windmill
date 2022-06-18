@@ -1,8 +1,384 @@
-openapi: 3.0.3
-info: 
+openapi: "3.0.3"
+
+info:
   version: 0.0.1
-  title: "Mini Go Automation"
-  
+  title: API for golang automation
+  contact:
+    name: Chinmoy
+    email: chinmoyrp65@gmail.com
+
 servers:
   - url: /api
 
+paths:
+  /steps:
+    get:
+      summary: list all available steps (go programs)
+      operationId: listSteps
+      tags:
+        - Steps
+      responses:
+        "200":
+          description: a list of all available go program files
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Steps"
+    post:
+      summary: add a step
+      operationId: addStep
+      tags:
+        - Steps
+      requestBody:
+        description: step details
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Steps"
+            example:
+              hash: "do not fill"
+              name: "hello world"
+              code: "package main
+                     import \"fmt\"
+                     func main()
+                     { fmt.Println(\"Hello World!\")}"    
+      responses:
+        "200":
+          description: step hash
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+
+  /steps/update:
+    post:
+      summary: update a step
+      operationId: updateStep
+      tags:
+        - Steps
+      requestBody:
+        description: step updates
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Steps"
+            example:
+              hash: "fill existing hash"
+              name: "new name"
+              code: "new program"    
+      responses:
+        "200":
+          description: step hash
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+
+  /steps/{hash}:
+    get:
+      summary: list step (go program) details
+      operationId: listStep
+      tags:
+        - Steps
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: details of a single step
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: "#/components/schemas/Steps"
+
+  /steps/remove/{hash}:
+    get:
+      summary: remove a step
+      operationId: removeStep
+      tags:
+        - Steps
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: hash of the removed step
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+
+  /flow:
+    get:
+      summary: list the steps added to the current (and the only) flow
+      operationId: listFlow
+      tags:
+        - Flow
+      responses:
+        "200":
+          description: a list of hash of all steps part of the flow
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Flow"
+              
+  /flow/add/{hash}:
+    get:
+      summary: add a step to the current flow
+      operationId: addToFlow
+      tags:
+        - Flow
+      parameters:
+        - name: hash
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: hash of the step added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+
+  /flow/remove/{index}:
+    get:
+      summary: remove a step from the current flow
+      operationId: removeFromFlow
+      tags:
+        - Flow
+      parameters:
+        - name: index
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: index from where hash was removed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: integer
+
+  /workers:
+    get:
+      summary: get all worker threads
+      operationId: listWorkers
+      tags:
+        - worker
+      responses:
+        "200":
+          description: available workers
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Workers"
+  
+  /jobs:
+    get:
+      summary: get all jobs
+      operationId: listJobs
+      tags:
+        - Jobs
+      responses:
+        "200":
+          description: list of jobs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Jobs"
+    post:
+      summary: add a job to execute
+      operationId: addJob
+      tags:
+        - Jobs
+      requestBody:
+        description: add a job
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Jobs"
+            example:
+              id: "do not fill"
+              worker_id: 0
+              status:
+                  Created: "do not fill"
+              kind:
+                Step: "fill valid step hash"
+                
+      responses:
+        "200":
+          description: job id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+
+  /jobs/{id}:
+    get:
+      summary: show job output
+      operationId: showJobOutput
+      tags:
+        - Jobs
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: output of the job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      output:
+                        type: array
+                        items:
+                          type: string
+
+  /logs:
+    get:
+      summary: view logs
+      operationId: viewLogs
+      tags:
+        - Logs
+      responses:
+        "200":
+          description: logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Logs"
+
+components:
+  schemas:
+    Steps:
+      type: object
+      properties:
+        hash:
+          type: string
+        name:
+          type: string
+        code:
+          type: string
+      required:
+        - hash
+        - name
+        - code
+
+    Flow:
+      type: object
+      properties:
+        steps:
+          type: array
+          items:
+            type: string
+      required:
+        - steps
+
+    Workers:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+          enum: [Idle, Busy]
+        last_updated:
+          type: string
+          example: "2022-06-18 06:36:43"
+
+      required:
+        - id
+        - status
+        - last_updated
+
+    Jobs:
+      type: object
+      properties:
+        id:
+          type: string
+        kind:
+          type: object
+        status:
+          type: object
+        worker_id:
+          type: integer
+      required:
+        - id
+        - kind
+        - status
+        - worker_id
+
+    Logs:
+      type: object
+      properties:
+        _id:
+          type: object
+        entries:
+          type: array
+          items:
+            type: string
