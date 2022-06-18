@@ -1,63 +1,80 @@
 <script lang="ts">
-    import ModalEdit from "./ModalEdit.svelte";
+    import { createEventDispatcher } from "svelte";
 
-    let viewCode = false;
+    const dispatch = createEventDispatcher();
 
+    export let index: number = -1;
     export let name: string = 'hello-world';
     export let hash: string = 'xxxyyy...';
-    export let code: string = `\
-package main
 
-import (
-    "fmt"
-    "time"
-)
-
-func main() {
-    fmt.Println("hello world!")
-}
-`
+    function stepDeleted() {
+		dispatch('stepDeleted');
+	}
 
     const createJob = async (hash: string) => {
-        console.log(JSON.stringify({id:2}));
+        //console.log(JSON.stringify({id:"", worker_id:0, status:{Created:""}, kind:{Step:hash}}));
         const response = await fetch("http://localhost:8080/api/jobs", {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
                                 },
-                                mode: 'no-cors',
-                                body: JSON.stringify({id:2})
+                                body: JSON.stringify({id:"", worker_id:0, status:{Created:""}, kind:{Step:hash}})
                             });
         const data = await response.json();
         
-        //console.log(data);
+        if (data.result) {
+            alert("Created job: " + data.result);
+        }
+    }
+
+    const removeStep = async (hash: string) => {
+        fetch("http://localhost:8080/api/steps/remove/"+hash)
+            .then(response => response.json())
+            .then(data => {
+                let id = data.result;
+               // alert('Deleted step: ' + id);
+            })
+            .catch(error => console.log(error));
+
+            location.reload();
+    }
+
+    const removeFromFlow = async () => {
+        fetch("http://localhost:8080/api/flow/remove/"+index)
+            .then(response => response.json())
+            .then(data => {
+                let id = data.result;
+                //alert('Removed step: ' + hash);
+            })
+            .catch(error => console.log(error));
+            location.reload();
     }
 
     function truncateHash(hash: string) {
-        return hash.substr(0, 10);
+        return hash.substr(0, 6);
     }
 
-    function openModal() {
-        viewCode = !viewCode;
-    }
-
-    function closeModal() {
-        viewCode = false;
+    function copyHash(hash: string) {
+        navigator.clipboard.writeText(hash);
     }
 
 </script>
 
 
-<div class = "step-card my-8 p-4 w-64 h-40 rounded-tl-2xl rounded-br-2xl">
+<div class = "step-card p-4 w-64 h-40 rounded-tl-2xl rounded-br-2xl">
     <div class="flex flex-col justify-around h-full">
         <div>
             <p class="text-lg">{name}</p>
-            <p class="text-xs">{truncateHash(hash)}</p> 
+            <button class="text-xs" on:click={()=>{copyHash(hash)}}>{truncateHash(hash)}...(Copy)</button> 
         </div>
 
         <div class="flex justify-end gap-2 text-sm">
-            <button on:click={openModal}>view</button>
-            <ModalEdit {code} {name} {viewCode}></ModalEdit>
+            {#if index === -1}
+            <button on:click={async () => {removeStep(hash)}}>del</button>
+            <button on:click={async () => {createJob(hash)}}>run</button>
+            {:else}
+            <button on:click={async () => {removeFromFlow()}}>del</button>
+            {/if}
         </div>
     </div>
 </div>
