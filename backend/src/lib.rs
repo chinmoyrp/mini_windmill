@@ -10,9 +10,9 @@ use axum::{
     routing::get, 
     handler::Handler,
     response::IntoResponse, 
-    http::{StatusCode, Uri, Method}};
+    http::{StatusCode, Uri}};
 use tower::ServiceBuilder;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use std::net::SocketAddr;
 use anyhow::Result;
 

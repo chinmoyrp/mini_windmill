@@ -3,14 +3,14 @@ use mongodb::{
     bson::doc
 };
 use serde::{Serialize, Deserialize};
-use chrono::Utc;
+use chrono::Local;
 use anyhow::Result;
 
 const MONGODB_URI: &str = "mongodb://172.19.0.3:27017";
 const DB_NAME: &str = "mini_windmill";
 
 pub fn get_current_datetime() -> String {
-    Utc::now().format("%Y-%m-%d %H:%M:%S").to_string()
+    Local::now().format("%Y-%m-%d %H:%M:%S").to_string()
 }
 
 pub async fn get_client() -> Result<Client> {
