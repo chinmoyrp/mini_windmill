@@ -46,7 +46,7 @@
             .then(response => response.json())
             .then(data => {
                 let id = data.result;
-                //alert('Added to flow: ' + id +". Please refresh.");
+                alert('Added to flow: ' + id +". Refreshing...");
                 location.reload();
             })
             .catch(error => console.log(error));

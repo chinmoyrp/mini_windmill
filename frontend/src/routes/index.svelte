@@ -29,7 +29,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.result) {
-                //alert("Added step: "+data.result+". Please refresh!");
+                alert("Added step: "+data.result+". Refreshing...");
                 location.reload();
             }
         })
