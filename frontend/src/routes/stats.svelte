@@ -9,3 +9,9 @@
     <h2 class="uppercase text-lg py-1 my-8 border-b-2">Job Stats</h2>
     <Job></Job>
 </div>
+
+<style>
+     h2 {
+        color: rgb(255, 255, 255, 0.7);
+    }
+</style>

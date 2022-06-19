@@ -78,7 +78,7 @@
 
 <div class="ml-4 mr-4 mt-12 mb-12 p-1">
     {#if !addFlow}
-    <div class="flex justify-between pb-1 mb-2 border-b-2 border-brightblue">
+    <div class="combo-h2 flex justify-between pb-1 mb-2 border-b-2">
         <h2 class="uppercase text-lg">Add steps to this flow</h2>
         <button class="rounded-lg text-sm p-1" on:click={async () => {createJob()}}>Run this flow</button>
     </div>
@@ -104,7 +104,7 @@
 
 
 <style>
-    h2 {
+    h2, .combo-h2 {
         color: rgb(255, 255, 255, 0.7);
     }
 
