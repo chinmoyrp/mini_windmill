@@ -29,14 +29,13 @@
         .then(response => response.json())
         .then(data => {
             if (data.result) {
-                alert("Added step: "+data.result+". Please refresh!");
+                //alert("Added step: "+data.result+". Please refresh!");
+                location.reload();
             }
         })
         .catch(error => console.log(error));
 
         addCode = false;
-
-        location.reload();
     }
 
     function showAddCode() {

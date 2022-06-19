@@ -34,10 +34,9 @@
             .then(data => {
                 let id = data.result;
                // alert('Deleted step: ' + id);
+               location.reload();
             })
             .catch(error => console.log(error));
-
-            location.reload();
     }
 
     const removeFromFlow = async () => {
@@ -46,9 +45,9 @@
             .then(data => {
                 let id = data.result;
                 //alert('Removed step: ' + hash);
+                location.reload();
             })
             .catch(error => console.log(error));
-            location.reload();
     }
 
     function truncateHash(hash: string) {

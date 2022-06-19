@@ -47,11 +47,11 @@
             .then(data => {
                 let id = data.result;
                 //alert('Added to flow: ' + id +". Please refresh.");
+                location.reload();
             })
             .catch(error => console.log(error));
 
             addFlow = false;
-            location.reload();
     }
 
     const createJob = async () => {

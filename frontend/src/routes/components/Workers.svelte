@@ -3,7 +3,7 @@
     import { apiServer, workers } from "../../store";
 
     onMount(async () => {
-        fetch($apiServer + "/api/workers")
+        fetch($apiServer + "/workers")
         .then(response => response.json())
         .then(data => {
             workers.set(data["result"]);            
