@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { workers } from "../../store";
+    import { apiServer, workers } from "../../store";
 
     onMount(async () => {
-        fetch("http://localhost:8080/api/workers")
+        fetch($apiServer + "/api/workers")
         .then(response => response.json())
         .then(data => {
             workers.set(data["result"]);            

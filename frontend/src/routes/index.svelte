@@ -1,11 +1,11 @@
 <script lang="ts">
     import Step from "./components/Step.svelte";
     import { onMount } from "svelte";
-    import { stepName, stepCode } from '../store';
+    import { apiServer, stepName, stepCode } from '../store';
 
     let steps = []
     const fetchSteps = async () => {
-        fetch("http://localhost:8080/api/steps")
+        fetch($apiServer + "/steps")
         .then(response => response.json())
         .then(data => {
             steps = data["result"]            
@@ -19,7 +19,7 @@
 
     let addCode : boolean = false;
     const createStep = async () => {
-        fetch("http://localhost:8080/api/steps", {
+        fetch($apiServer + "/steps", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

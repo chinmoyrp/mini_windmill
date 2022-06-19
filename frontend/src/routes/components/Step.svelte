@@ -1,5 +1,6 @@
 <script lang="ts">
     import { createEventDispatcher } from "svelte";
+    import { apiServer } from "../../store";
 
     const dispatch = createEventDispatcher();
 
@@ -13,7 +14,7 @@
 
     const createJob = async (hash: string) => {
         //console.log(JSON.stringify({id:"", worker_id:0, status:{Created:""}, kind:{Step:hash}}));
-        const response = await fetch("http://localhost:8080/api/jobs", {
+        const response = await fetch($apiServer + "/jobs", {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
@@ -28,7 +29,7 @@
     }
 
     const removeStep = async (hash: string) => {
-        fetch("http://localhost:8080/api/steps/remove/"+hash)
+        fetch($apiServer + "/steps/remove/" + hash)
             .then(response => response.json())
             .then(data => {
                 let id = data.result;
@@ -40,7 +41,7 @@
     }
 
     const removeFromFlow = async () => {
-        fetch("http://localhost:8080/api/flow/remove/"+index)
+        fetch($apiServer + "/flow/remove/" + index)
             .then(response => response.json())
             .then(data => {
                 let id = data.result;

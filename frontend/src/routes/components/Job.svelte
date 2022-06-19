@@ -1,9 +1,9 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { jobs } from "../../store";
+    import { apiServer, jobs } from "../../store";
 
     onMount(async () => {
-        fetch("http://localhost:8080/api/jobs")
+        fetch($apiServer + "/jobs")
         .then(response => response.json())
         .then(data => {
            // console.log(data["result"])
@@ -23,7 +23,7 @@
     let out = '';
 
     const fetchJobDetails = async (id: string) => {
-        const response = await fetch("http://localhost:8080/api/jobs/" + id);
+        const response = await fetch($apiServer + "/jobs/" + id);
         const data = await response.json();
         const arrOut = data['result'];
         const _output = arrOut['output'];
@@ -34,7 +34,7 @@
         // const isStep = jobKind[0].localeCompare('Step') === 0;
         // if (isStep) {
         //     const hash = Object.values(kind);
-        //     const resp = await fetch("http://localhost:8080/api/steps/" + hash);
+        //     const resp = await fetch("$apiServer + "/steps/" + hash);
         //     const dt = await resp.json()
         //     const arr = Object.values(dt['result']);
         //     step = arr[2];

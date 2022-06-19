@@ -1,13 +1,13 @@
 <script lang="ts">
     import Step from "./components/Step.svelte";
     import { onMount } from "svelte";
-    import { stepHash } from '../store';
+    import { apiServer, stepHash } from '../store';
 
     let flow = [];
     const getFlow = async () => {
         Promise.all([
-            fetch('http://localhost:8080/api/flow'),
-            fetch('http://localhost:8080/api/steps')
+            fetch($apiServer + "/flow"),
+            fetch($apiServer + "/steps")
         ]).then(function (responses) {
             // Get a JSON object from each of the responses
             return Promise.all(responses.map(function (response) {
@@ -42,7 +42,7 @@
     });
 
     const addToFlow = async () => {
-        fetch("http://localhost:8080/api/flow/add/"+$stepHash)
+        fetch($apiServer + "/flow/add/" + $stepHash)
             .then(response => response.json())
             .then(data => {
                 let id = data.result;
@@ -55,7 +55,7 @@
     }
 
     const createJob = async () => {
-        const response = await fetch("http://localhost:8080/api/jobs", {
+        const response = await fetch($apiServer + "/jobs", {
                                 method: 'POST',
                                 headers: {
                                     'Content-Type': 'application/json'
