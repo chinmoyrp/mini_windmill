@@ -2,6 +2,14 @@
 
 ## Execute go programs
 
+### Stack: 
+* **Backend**: Rust + MongoDB
+* **Frontend**: Svelte
+
+***Note***
+
+This demo lacks unit tests and I have used unwrap() very generously. So things might go wrong.
+
 **Step** (basically scripts/go programs)
 
 ![image info](images/step.png)
