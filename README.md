@@ -12,7 +12,7 @@ The backend is **Rust** with **MongoDB** and in frontend is **Svelte**.
 
 **Note 2:** This was inspired by [Windmill](https://github.com/windmill-labs/windmill), hence the name.
 
-**Note 3:** Demo is hosted here: https://min_windmill.vercel.app/
+**Note 3:** Demo is hosted here: https://mini-windmill.vercel.app/
 
 ![image info](images/step.png)
 
