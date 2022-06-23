@@ -1,16 +1,18 @@
 # Mini-windmill
 
-## Execute go programs
+## Execute Go programs
 
-### Stack: 
-* **Backend**: Rust + MongoDB
-* **Frontend**: Svelte
+The intention behind this project is to teach myself rust and little bit of Go.
 
-***Note***
+What it does is basically provide an interface to store Go programs remotely and run them either individually or as part of a flow/sequence.
 
-This demo lacks unit tests and I have used unwrap() very generously. So things might go wrong.
+The backend is **Rust** with **MongoDB** and in frontend is **Svelte**.
 
-**Step** (basically scripts/go programs)
+**Note 1:** This project might seem random. But initially the goal here was to chain multiple Go programs, have them interact with external services like Airtable, and automate some workflows. Currently it's doing none of that.
+
+**Note 2:** This was inspired by [Windmill](https://github.com/windmill-labs/windmill), hence the name.
+
+**Note 3:** Demo is hosted here: https://min_windmill.vercel.app/
 
 ![image info](images/step.png)
 
